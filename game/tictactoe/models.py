@@ -1,3 +1,5 @@
+import enum
+
 from django.db import models
 
 
@@ -8,6 +10,12 @@ class Player(models.Model):
         return self.handle
 
 
+class FieldState(enum.Enum):
+    X = "X"
+    O = "O"
+    EMPTY = " "
+
+
 class Board(models.Model):
     noughtsPlayer = models.ForeignKey(
         Player, on_delete=models.SET_NULL, null=True, related_name="noughts_players"
@@ -15,9 +23,23 @@ class Board(models.Model):
     crossesPlayer = models.ForeignKey(
         Player, on_delete=models.SET_NULL, null=True, related_name="crosses_players"
     )
-    status = models.CharField(max_length=9)
+    state = models.CharField(max_length=9, default=" " * 9)
 
     def __str__(self) -> str:
         return (
-            f"X = {self.crossesPlayer} O = {self.noughtsPlayer} status = {self.status}"
+            f"X = {self.crossesPlayer} O = {self.noughtsPlayer} status = {self.state}"
         )
+
+    def get_field_state(self, row: int, col: int) -> FieldState:
+        if 0 <= row < 3 and 0 <= col < 3:
+            return FieldState(self.state[row * 3 + col])
+        else:
+            raise ValueError(f"Invalid row or col {row, col}")
+
+    def set_field_state(self, row: int, col: int, field_state: FieldState) -> None:
+        if 0 <= row < 3 and 0 <= col < 3:
+            list_state = list(self.state)
+            list_state[row * 3 + col] = field_state.value
+            self.state = "".join(list_state)
+        else:
+            raise ValueError(f"Invalid row or col {row, col}")
