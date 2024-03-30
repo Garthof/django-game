@@ -1,12 +1,29 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en-US">
-  <head>
-    <meta charset="utf-8" />
-    <title>TicTacToe - Board {{ board.id }}</title>
-  </head>
-  <body>
-    <p>Crosses: {{ board.crosses_player }}</p>
-    <p>Noughts: {{ board.noughts_player }}</p>
-    <p>State: {{ board.state }}</p>
-  </body>
+    <head>
+        <meta charset="utf-8" />
+        <title>TicTacToe - Board {{ board.id }}</title>
+        <link rel="stylesheet" href="{% static "tictactoe/style.css" %}" />
+    </head>
+    <body>
+        <p>Crosses: {{ board.crosses_player }}</p>
+        <p>Noughts: {{ board.noughts_player }}</p>
+
+        <p>Board:</p>
+        <div class="board">
+        {% for row in field_states %}
+            <div class="row">
+            {% for field in row %}
+            {% if field.value == " " %}
+                <div class="field">&emsp;</div>
+            {% else %}
+                <div class="field">{{ field.value }}</div>
+            {% endif %}
+            {% endfor %}
+            </div>
+        {% endfor %}
+        </div>
+    </body>
 </html>

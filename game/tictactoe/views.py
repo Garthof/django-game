@@ -10,5 +10,8 @@ def board(request: HttpRequest, id: int) -> HttpResponse:
     except Board.DoesNotExist:
         raise Http404(f"Board {id} does not exist")
 
-    context = {"board": board}
+    field_states = [
+        [board.get_field_state(row, col) for col in range(3)] for row in range(3)
+    ]
+    context = {"board": board, "field_states": field_states}
     return render(request, "tictactoe/board.html", context)

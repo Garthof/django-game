@@ -1,0 +1,20 @@
+body {
+    font: 20px Arial, sans-serif;
+}
+
+.field {
+    flex-basis: 100%;
+    font: 150px Courier, sans-serif;
+    border: 5px solid black;
+    text-align: center;
+    margin: 0.25rem;
+}
+
+.row {
+    display: flex;
+}
+
+.board {
+    width: 650px;
+    height: 700px;
+}
