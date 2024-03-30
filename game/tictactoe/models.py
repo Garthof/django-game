@@ -17,17 +17,17 @@ class FieldState(enum.Enum):
 
 
 class Board(models.Model):
-    noughtsPlayer = models.ForeignKey(
+    noughts_player = models.ForeignKey(
         Player, on_delete=models.SET_NULL, null=True, related_name="noughts_players"
     )
-    crossesPlayer = models.ForeignKey(
+    crosses_player = models.ForeignKey(
         Player, on_delete=models.SET_NULL, null=True, related_name="crosses_players"
     )
     state = models.CharField(max_length=9, default=" " * 9)
 
     def __str__(self) -> str:
         return (
-            f"X = {self.crossesPlayer} O = {self.noughtsPlayer} status = {self.state}"
+            f"X = {self.crosses_player} O = {self.noughts_player} status = {self.state}"
         )
 
     def get_field_state(self, row: int, col: int) -> FieldState:
