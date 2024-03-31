@@ -1,13 +1,7 @@
 import enum
 
+from django.contrib.auth.models import User
 from django.db import models
-
-
-class Player(models.Model):
-    handle = models.CharField(max_length=16, unique=True)
-
-    def __str__(self) -> str:
-        return self.handle
 
 
 class FieldState(enum.Enum):
@@ -18,10 +12,10 @@ class FieldState(enum.Enum):
 
 class Board(models.Model):
     noughts_player = models.ForeignKey(
-        Player, on_delete=models.SET_NULL, null=True, related_name="noughts_players"
+        User, on_delete=models.SET_NULL, null=True, related_name="noughts_players"
     )
     crosses_player = models.ForeignKey(
-        Player, on_delete=models.SET_NULL, null=True, related_name="crosses_players"
+        User, on_delete=models.SET_NULL, null=True, related_name="crosses_players"
     )
     state = models.CharField(max_length=9, default=" " * 9)
 
