@@ -2,6 +2,16 @@ body {
     font: 20px Arial, sans-serif;
 }
 
+.board {
+    width: 650px;
+    height: 700px;
+}
+
+.row {
+    display: flex;
+}
+
+/**/
 .field {
     flex-basis: 100%;
     font: 150px Courier, sans-serif;
@@ -10,11 +20,10 @@ body {
     margin: 0.25rem;
 }
 
-.row {
-    display: flex;
+.field:hover {
+    background: lightyellow;
 }
 
-.board {
-    width: 650px;
-    height: 700px;
+.field:active {
+    background: orange;
 }

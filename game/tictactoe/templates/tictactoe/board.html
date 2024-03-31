@@ -5,22 +5,25 @@
     <head>
         <meta charset="utf-8" />
         <title>TicTacToe - Board {{ board.id }}</title>
-        <link rel="stylesheet" href="{% static "tictactoe/style.css" %}" />
+        <link rel="stylesheet" href="{% static 'tictactoe/style.css' %}" />
+        <script src="{%static 'tictactoe/htmx.min.js' %}"></script>
     </head>
-    <body>
+    <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
         <p>Crosses: {{ board.crosses_player }}</p>
         <p>Noughts: {{ board.noughts_player }}</p>
 
         <p>Board:</p>
         <div class="board">
-        {% for row in field_states %}
+        {% for row in field_infos %}
             <div class="row">
-            {% for field in row %}
-            {% if field.value == " " %}
-                <div class="field">&emsp;</div>
-            {% else %}
-                <div class="field">{{ field.value }}</div>
-            {% endif %}
+            {% for field_info in row %}
+                <div class="field" hx-post="{{ field_info.url_set_field_state }}">
+                {% if field_info.state.value == " " %}
+                    &emsp;
+                {% else %}
+                    {{ field_info.state.value }}
+                {% endif %}
+                </div>
             {% endfor %}
             </div>
         {% endfor %}
