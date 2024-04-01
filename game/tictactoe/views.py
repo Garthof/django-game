@@ -1,6 +1,6 @@
 from typing import Any
 
-from django.http import Http404, HttpRequest, HttpResponse
+from django.http import Http404, HttpRequest, HttpResponse, HttpResponseForbidden
 from django.shortcuts import render
 from django.urls import reverse
 
@@ -51,12 +51,21 @@ def board(request: HttpRequest, id: int) -> HttpResponse:
 def set_field_state(
     request: HttpRequest, board_id: int, row: int, col: int
 ) -> HttpResponse:
+    if not request.user.is_authenticated:
+        return HttpResponseForbidden("You must be logged in to perform this action")
+
     try:
         board = Board.objects.get(pk=board_id)
     except Board.DoesNotExist:
         raise Http404(f"Board {id} does not exist")
 
-    new_field_state = FieldState.X
+    if request.user == board.crosses_player:
+        new_field_state = FieldState.X
+    elif request.user == board.noughts_player:
+        new_field_state = FieldState.O
+    else:
+        return HttpResponseForbidden("You must join the board to perform this action")
+
     board.set_field_state(row, col, new_field_state)
     board.save()
 
