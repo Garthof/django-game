@@ -13,12 +13,21 @@
 {% block content %}
 {% if user.is_authenticated %}
 <p>User: {{ user.get_username }}</p>
-<p>
+
+<div id="boards">
+    {% for board in user_boards %}
+    <ul class="board_info">
+        <li>ID: <a href="{% url 'tictactoe:board' board.id %}">{{ board.id }}</a></li>
+        <li>Crosses: {{ board.crosses_player }}</li>
+        <li>Noughts: {{ board.noughts_player }}</li>
+    </ul>
+    {% endfor %}
+</div>
+
 <form id="logout-form" method="post" action="{% url 'logout' %}">
     {% csrf_token %}
     <button type="submit">Logout</button>
 </form>
-</p>
 {% else %}
 <p><a href="{% url 'login' %}?next={{ request.path }}">Login</a></p>
 {% endif %}

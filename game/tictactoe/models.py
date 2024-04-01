@@ -11,6 +11,7 @@ class FieldState(enum.Enum):
 
 
 class Board(models.Model):
+    id: int
     noughts_player = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, related_name="noughts_players"
     )
