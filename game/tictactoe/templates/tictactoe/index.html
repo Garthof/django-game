@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}
+<title>TicTacToe - Index</title>
+{% endblock %}
+
+{% block style %}
+<link rel="stylesheet" href="{% static 'tictactoe/style.css' %}" />
+{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+<p>User: {{ user.get_username }}</p>
+<p>
+<form id="logout-form" method="post" action="{% url 'logout' %}">
+    {% csrf_token %}
+    <button type="submit">Logout</button>
+</form>
+</p>
+{% else %}
+<p><a href="{% url 'login' %}?next={{ request.path }}">Login</a></p>
+{% endif %}
+{% endblock %}

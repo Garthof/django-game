@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{%load static %}
+{% load static %}
 
 {% block title %}
 <title>TicTacToe - Board {{ board.id }}</title>
@@ -15,22 +15,22 @@
 {% endblock %}
 
 {% block content %}
-    <p>Crosses: {{ board.crosses_player }}</p>
-    <p>Noughts: {{ board.noughts_player }}</p>
+<p>Crosses: {{ board.crosses_player }}</p>
+<p>Noughts: {{ board.noughts_player }}</p>
 
-    <p>Board:</p>
-    <div class="board" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
-    {% for row in field_infos %}
-        <div class="row">
-        {% for field_info in row %}
-            <div class="field" hx-post="{{ field_info.url_set_field_state }}">
-            {% if field_info.state.value == " " %}
-                &emsp;
-            {% else %}
-                {{ field_info.state.value }}
-            {% endif %}
-            </div>
-        {% endfor %}
+<p>Board:</p>
+<div class="board" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+{% for row in field_infos %}
+    <div class="row">
+    {% for field_info in row %}
+        <div class="field" hx-post="{{ field_info.url_set_field_state }}">
+        {% if field_info.state.value == " " %}
+            &emsp;
+        {% else %}
+            {{ field_info.state.value }}
+        {% endif %}
         </div>
     {% endfor %}
+    </div>
+{% endfor %}
 {% endblock %}

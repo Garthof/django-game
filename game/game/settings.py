@@ -123,8 +123,11 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Redirect to home URL after login (Default redirects to /accounts/profile/)
+# Redirect to home URL after login (default redirects to /accounts/profile/)
 LOGIN_REDIRECT_URL = "/"
+
+# Redirect to home URL after logout (default redirect to /admin/login)
+LOGOUT_REDIRECT_URL = "/tictactoe"
 
 # Use fake email backend for testing: it prints the email to the console
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
