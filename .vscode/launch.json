@@ -1,0 +1,35 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "runserver",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/game",
+            "program": "${workspaceFolder}/game/manage.py",
+            "args": [
+                "runserver"
+            ],
+            "django": true,
+            "autoStartBrowser": false
+        },
+        {
+            "name": "test",
+            "type": "debugpy",
+            "request": "launch",
+            // Set current directory so that all tests run. When manage.py is invoked
+            // from another directory, you have to specify for which app tests must be
+            // run (see https://stackoverflow.com/a/35566512) 
+            "cwd": "${workspaceFolder}/game",
+            "program": "${workspaceFolder}/game/manage.py",
+            "args": [
+                "test"
+            ],
+            "django": true,
+            "autoStartBrowser": false
+        }
+    ]
+}
