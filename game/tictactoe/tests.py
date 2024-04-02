@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -38,7 +40,7 @@ class BoardModelTests(TestCase):
         self.assertEqual(board.state, "OOXOXX   ")
 
 
-class IndexViewTest(TestCase):
+class TicTacToeViewTest(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         cls.password = "test"
@@ -55,6 +57,12 @@ class IndexViewTest(TestCase):
             crosses_player=cls.user3, noughts_player=cls.user1
         )
 
+
+class IndexViewTest(TicTacToeViewTest):
+    def test_non_logged_users_see_no_boards(self) -> None:
+        response = self.client.get(reverse("tictactoe:index"))
+        self.assertQuerySetEqual(response.context["user_boards"], [], ordered=False)
+
     def test_boards_of_logged_user_are_displayed(self) -> None:
         self.client.login(username=self.user1.username, password=self.password)
         response = self.client.get(reverse("tictactoe:index"))
@@ -62,6 +70,61 @@ class IndexViewTest(TestCase):
             response.context["user_boards"], [self.board1, self.board3], ordered=False
         )
 
-    def test_non_logged_users_see_no_boards(self) -> None:
-        response = self.client.get(reverse("tictactoe:index"))
-        self.assertQuerySetEqual(response.context["user_boards"], [], ordered=False)
+
+class BoardViewTest(TicTacToeViewTest):
+    def test_request_for_non_existing_board_returns_404(self) -> None:
+        response = self.client.get(reverse("tictactoe:board", args=[0]))
+        self.assertEqual(response.status_code, 404)
+
+    def test_request_for_existing_board_returns_correct_info(self) -> None:
+        response = self.client.get(reverse("tictactoe:board", args=[self.board1.id]))
+        self.assertEqual(response.context["board"], self.board1)
+        self.assertTrue(len(response.context["field_infos"]) > 0)
+
+
+class SetFieldStateViewTest(TicTacToeViewTest):
+    board_id = 1
+    row = 2
+    col = 2
+    url_args = [board_id, row, col]
+
+    def test_non_logged_users_cannot_modify_board(self):
+        response = self.client.post(
+            reverse("tictactoe:set_field_state", args=self.url_args)
+        )
+        self.assertEqual(response.status_code, 403)  # Status code is FORBIDDEN
+
+    def test_logged_user_can_modify_their_board(self):
+        board = Board.objects.get(pk=self.board_id)
+
+        def modify_board(user: User, new_field_state: FieldState):
+            self.client.login(username=user.username, password=self.password)
+
+            response = self.client.post(
+                reverse("tictactoe:set_field_state", args=self.url_args)
+            )
+            self.assertEqual(response.content.decode(), new_field_state.value)
+
+            modified_board = Board.objects.get(pk=self.board_id)
+            self.assertEqual(
+                modified_board.get_field_state(self.row, self.col), new_field_state
+            )
+
+            self.client.logout()
+
+        user = board.crosses_player
+        assert user is not None
+        modify_board(user, FieldState.X)
+
+        user = board.noughts_player
+        assert user is not None
+        modify_board(user, FieldState.O)
+
+    def test_logged_user_cannot_modify_other_boards(self):
+        board = Board.objects.get(pk=self.board_id)
+        self.client.login(username=self.user3.username, password=self.password)
+        response = self.client.post(
+            reverse("tictactoe:set_field_state", args=self.url_args)
+        )
+        self.assertEqual(response.status_code, 403)  # Status code is FORBIDDEN
+        self.assertEqual(board, Board.objects.get(pk=self.board_id))

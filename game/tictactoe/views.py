@@ -46,7 +46,7 @@ def board(request: HttpRequest, id: int) -> HttpResponse:
     field_infos = [[FieldInfo(board, row, col) for col in range(3)] for row in range(3)]
     context: dict[str, Any] = {"board": board, "field_infos": field_infos}
 
-    if request.headers["HX-Request"]:
+    if request.headers.get("HX-Request"):
         return render(request, "tictactoe/board_detail.html", context)
     else:
         return render(request, "tictactoe/board.html", context)
