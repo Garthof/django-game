@@ -4,6 +4,7 @@ from django.http import Http404, HttpRequest, HttpResponse, HttpResponseForbidde
 from django.shortcuts import render
 from django.urls import reverse
 
+from .game import occupy_field
 from .models import Board, FieldState
 
 
@@ -70,7 +71,10 @@ def set_field_state(
     else:
         return HttpResponseForbidden("You must join the board to perform this action")
 
-    board.set_field_state(row, col, new_field_state)
-    board.save()
+    try:
+        occupy_field(board, row, col, new_field_state)
+        board.save()
+    except Exception as e:
+        return HttpResponseForbidden(str(e))
 
     return HttpResponse(new_field_state.value)
