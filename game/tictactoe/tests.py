@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 
+from .game import Game, GameState
 from .models import Board, FieldState
 
 
@@ -84,47 +85,97 @@ class BoardViewTest(TicTacToeViewTest):
 
 class SetFieldStateViewTest(TicTacToeViewTest):
     board_id = 1
-    row = 2
-    col = 2
-    url_args = [board_id, row, col]
 
     def test_non_logged_users_cannot_modify_board(self):
         response = self.client.post(
-            reverse("tictactoe:set_field_state", args=self.url_args)
+            reverse("tictactoe:set_field_state", args=[self.board_id, 0, 0])
         )
         self.assertEqual(response.status_code, 403)  # Status code is FORBIDDEN
 
     def test_logged_user_can_modify_their_board(self):
         board = Board.objects.get(pk=self.board_id)
 
-        def modify_board(user: User, new_field_state: FieldState):
+        def modify_board(user: User, row: int, col: int, new_field_state: FieldState):
             self.client.login(username=user.username, password=self.password)
 
             response = self.client.post(
-                reverse("tictactoe:set_field_state", args=self.url_args)
+                reverse("tictactoe:set_field_state", args=[self.board_id, row, col])
             )
             self.assertEqual(response.content.decode(), new_field_state.value)
 
             modified_board = Board.objects.get(pk=self.board_id)
-            self.assertEqual(
-                modified_board.get_field_state(self.row, self.col), new_field_state
-            )
+            self.assertEqual(modified_board.get_field_state(row, col), new_field_state)
 
             self.client.logout()
 
         user = board.crosses_player
         assert user is not None
-        modify_board(user, FieldState.X)
+        modify_board(user, 0, 0, FieldState.X)
 
         user = board.noughts_player
         assert user is not None
-        modify_board(user, FieldState.O)
+        modify_board(user, 2, 2, FieldState.O)
 
     def test_logged_user_cannot_modify_other_boards(self):
         board = Board.objects.get(pk=self.board_id)
         self.client.login(username=self.user3.username, password=self.password)
         response = self.client.post(
-            reverse("tictactoe:set_field_state", args=self.url_args)
+            reverse("tictactoe:set_field_state", args=[self.board_id, 0, 0])
         )
         self.assertEqual(response.status_code, 403)  # Status code is FORBIDDEN
         self.assertEqual(board, Board.objects.get(pk=self.board_id))
+
+
+class GameTest(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.board = Board()
+        cls.game = Game(cls.board)
+
+    def test_get_state(self):
+        self.board.state = "         "
+        self.assertEquals(self.game.get_state(), GameState.ON_GOING)
+
+        self.board.state = "XXX      "
+        self.assertEquals(self.game.get_state(), GameState.CROSSES_WON)
+
+        self.board.state = "  O  O  O"
+        self.assertEquals(self.game.get_state(), GameState.NOUGHTS_WON)
+
+        self.board.state = "X   X   X"
+        self.assertEquals(self.game.get_state(), GameState.CROSSES_WON)
+
+        self.board.state = "  O O O  "
+        self.assertEquals(self.game.get_state(), GameState.NOUGHTS_WON)
+
+        self.board.state = "XOXXOXOXO"
+        self.assertEquals(self.game.get_state(), GameState.TIE)
+
+    def test_occupy_field_with_cross(self) -> None:
+        # Occupying with an empty state raises an exception
+        self.assertRaises(ValueError, self.game.occupy_field, 0, 0, FieldState.EMPTY)
+
+        # First movement with X works
+        self.game.occupy_field(0, 0, FieldState.X)
+        self.assertEqual(self.board.state, "X        ")
+
+        # Two movements of X in a row raise an exception
+        self.assertRaises(Exception, self.game.occupy_field, 1, 1, FieldState.X)
+
+        # Hitting an occupied field raises an exception
+        self.assertRaises(Exception, self.game.occupy_field, 0, 0, FieldState.O)
+
+        # First valid movement with O works
+        self.game.occupy_field(2, 2, FieldState.O)
+        self.assertEqual(self.board.state, "X       O")
+
+        # Two movements of O in a row raise an exception
+        self.assertRaises(Exception, self.game.occupy_field, 1, 1, FieldState.O)
+
+        # X can now move
+        self.game.occupy_field(1, 1, FieldState.X)
+        self.assertEqual(self.board.state, "X   X   O")
+
+        # In a finished game, it is not possible to occupy more fields
+        self.board.state = "XXX      "
+        self.assertRaises(Exception, self.game.occupy_field, 1, 1, FieldState.X)
