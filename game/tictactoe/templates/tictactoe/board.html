@@ -12,6 +12,7 @@
 
 {% block script %}
 <script src="{% static 'tictactoe/htmx.min.js' %}"></script>
+<script src="{% static 'tictactoe/board.js' %}" defer></script>
 {% endblock %}
 
 {% block content %}
@@ -20,4 +21,8 @@
 
 <p>Board:</p>
 {% include "tictactoe/board_detail.html" %}
+
+<div id="status_area" hidden>
+    <p id="status_message"></p>
+</div>
 {% endblock %}

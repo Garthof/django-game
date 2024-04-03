@@ -2,6 +2,7 @@
      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' 
      hx-get="{% url 'tictactoe:board' board.id %}" 
      hx-trigger="every 1s"
+     hx-disabled-elt="this"
 >
 {% for row in field_infos %}
     <div class="row">
