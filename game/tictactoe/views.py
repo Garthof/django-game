@@ -22,7 +22,7 @@ class FieldInfo:
 
     def url_set_field_state(self) -> str:
         return reverse(
-            "tictactoe:set_field_state", args=[self.board.id, self.row, self.col]
+            "tictactoe:set_field_state", args=(self.board.id, self.row, self.col)
         )
 
 
