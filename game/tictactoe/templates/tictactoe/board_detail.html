@@ -1,5 +1,4 @@
 <div id="board_detail" class="board" 
-     hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' 
      hx-get="{% url 'tictactoe:board_detail' board.id %}" 
      hx-trigger="every 1s"
      hx-disabled-elt="this">

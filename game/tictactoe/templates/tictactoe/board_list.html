@@ -1,0 +1,9 @@
+<div id="boards">
+    {% for board in user_boards %}
+    <ul class="board_info">
+        <li>ID: <a href="{% url 'tictactoe:board' board.id %}">{{ board.id }}</a></li>
+        <li>Crosses: {{ board.crosses_player }}</li>
+        <li>Noughts: {{ board.noughts_player }}</li>
+    </ul>
+    {% endfor %}
+</div>

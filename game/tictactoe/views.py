@@ -90,6 +90,8 @@ def create_board(request: HttpRequest) -> HttpResponse:
 
     redirect_url = reverse("tictactoe:board", args=(new_board.id,))
     if request.headers.get("HX-Request"):
+        # Redirects are triggered by HTMX if the response's status code is 200 and the
+        # header contains the field "HX-Redirect" with the target URL
         response = HttpResponse()
         response.headers["HX-Redirect"] = redirect_url  # type: ignore
     else:

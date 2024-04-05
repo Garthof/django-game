@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "tictactoe/base.html" %}
 
 {% load static %}
 
@@ -6,29 +6,13 @@
 <title>TicTacToe - Index</title>
 {% endblock %}
 
-{% block style %}
-<link rel="stylesheet" href="{% static 'tictactoe/style.css' %}" />
-{% endblock %}
-
-{% block script %}
-<script src="{% static 'tictactoe/htmx.min.js' %}"></script>
-{% endblock %}
-
-{% block content %}
+{% block tictactoe_content %}
 {% if user.is_authenticated %}
 <p>User: {{ user.get_username }}</p>
 
-<div id="boards">
-    {% for board in user_boards %}
-    <ul class="board_info">
-        <li>ID: <a href="{% url 'tictactoe:board' board.id %}">{{ board.id }}</a></li>
-        <li>Crosses: {{ board.crosses_player }}</li>
-        <li>Noughts: {{ board.noughts_player }}</li>
-    </ul>
-    {% endfor %}
-</div>
+{% include "tictactoe/board_list.html" %}
 
-<div hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+<div>
     <button hx-post="{% url 'tictactoe:create_board' %}">Create new board</button>
 </div>
 

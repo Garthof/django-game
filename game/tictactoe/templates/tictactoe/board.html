@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "tictactoe/base.html" %}
 
 {% load static %}
 
@@ -6,16 +6,12 @@
 <title>TicTacToe - Board {{ board.id }}</title>
 {%endblock%}
 
-{% block style %}
-<link rel="stylesheet" href="{% static 'tictactoe/style.css' %}" />
-{% endblock %}
-
-{% block script %}
-<script src="{% static 'tictactoe/htmx.min.js' %}"></script>
+{%  block script %}
+{{ block.super }}
 <script src="{% static 'tictactoe/board.js' %}" defer></script>
 {% endblock %}
 
-{% block content %}
+{% block tictactoe_content %}
 <p><a href="{% url 'tictactoe:index' %}">Back to main page</a></p>
 
 <div id="players_area">
@@ -31,4 +27,5 @@
 <div id="status_area" hidden>
     <p id="status_message"></p>
 </div>
+
 {% endblock %}
