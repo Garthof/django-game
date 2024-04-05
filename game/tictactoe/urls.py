@@ -11,6 +11,7 @@ urlpatterns: list[URLPattern] = [
     path("boards/create/", views.create_board, name="create_board"),
     path("boards/<int:board_id>/", views.board, name="board"),
     path("boards/detail/<int:board_id>/", views.board_detail, name="board_detail"),
+    path("boards/join/<int:board_id>/", views.join_board, name="join_board"),
     path(
         "boards/set_field_state/<int:board_id>/<int:row>/<int:col>",
         views.set_field_state,

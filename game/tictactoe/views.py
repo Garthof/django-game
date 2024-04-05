@@ -63,13 +63,53 @@ def open_boards(request: HttpRequest) -> HttpResponse:
 
 
 def board(request: HttpRequest, board_id: int) -> HttpResponse:
-    return render(request, "tictactoe/board.html", generate_board_context(board_id))
+    context = generate_board_detail_context(board_id)
+
+    if request.user.is_authenticated:
+        board = Board.objects.get(pk=board_id)
+        if (
+            board.crosses_player != request.user
+            and board.noughts_player != request.user
+        ):
+            context |= {"user_can_join": True}
+
+    return render(request, "tictactoe/board.html", context)
 
 
 def board_detail(request: HttpRequest, board_id: int) -> HttpResponse:
     return render(
-        request, "tictactoe/board_detail.html", generate_board_context(board_id)
+        request, "tictactoe/board_detail.html", generate_board_detail_context(board_id)
     )
+
+
+def join_board(request: HttpRequest, board_id: int) -> HttpResponse:
+    if not request.user.is_authenticated:
+        return HttpResponseForbidden("You must be logged in to perform this action")
+
+    try:
+        board = Board.objects.get(pk=board_id)
+    except Board.DoesNotExist:
+        raise Http404(f"Board {id} does not exist")
+
+    if not board.crosses_player:
+        board.crosses_player = request.user  # type: ignore
+        board.save()
+    elif not board.noughts_player:
+        board.noughts_player = request.user  # type: ignore
+        board.save()
+    else:
+        return HttpResponseForbidden("No free space available to join board")
+
+    redirect_url = reverse("tictactoe:board", args=(board_id,))
+    if request.headers.get("HX-Request"):
+        # Redirects are triggered by HTMX if the response's status code is 200 and the
+        # header contains the field "HX-Redirect" with the target URL
+        response = HttpResponse()
+        response.headers["HX-Redirect"] = redirect_url  # type: ignore
+    else:
+        response = HttpResponseRedirect(redirect_url)
+
+    return response
 
 
 def set_field_state(
@@ -118,7 +158,7 @@ def create_board(request: HttpRequest) -> HttpResponse:
     return response
 
 
-def generate_board_context(board_id: int) -> dict[str, Any]:
+def generate_board_detail_context(board_id: int) -> dict[str, Any]:
     try:
         board = Board.objects.get(pk=board_id)
     except Board.DoesNotExist:

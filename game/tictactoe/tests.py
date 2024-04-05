@@ -1,3 +1,5 @@
+import enum
+
 from typing import cast
 
 from django.contrib.auth import authenticate
@@ -8,6 +10,10 @@ from django.urls import reverse
 
 from .game import Game, GameState
 from .models import Board, FieldState
+
+
+class StatusCode(enum.Enum):
+    FORBIDDEN = 403
 
 
 class BoardModelTests(TestCase):
@@ -103,6 +109,28 @@ class BoardViewTest(TicTacToeViewTest):
         self.assertTrue(len(response.context["field_infos"]) > 0)
 
 
+class JoinBoardTest(TicTacToeViewTest):
+    def test_non_logged_users_cannot_join_board(self) -> None:
+        response = self.client.post(
+            reverse("tictactoe:join_board", args=(self.board4.id,))
+        )
+        self.assertEqual(response.status_code, StatusCode.FORBIDDEN.value)
+
+    def test_logged_user_can_join_board(self) -> None:
+        self.client.login(username=self.user1.username, password=self.password)
+        self.client.post(reverse("tictactoe:join_board", args=(self.board4.id,)))
+
+        modified_board = Board.objects.get(pk=self.board4.id)
+        self.assertEqual(modified_board.noughts_player, self.user1)
+
+    def test_logged_user_cannot_join_full_boards(self) -> None:
+        self.client.login(username=self.user1.username, password=self.password)
+        response = self.client.post(
+            reverse("tictactoe:join_board", args=(self.board2.id,))
+        )
+        self.assertEqual(response.status_code, StatusCode.FORBIDDEN.value)
+
+
 class SetFieldStateViewTest(TicTacToeViewTest):
     board_id = 1
 
@@ -110,7 +138,7 @@ class SetFieldStateViewTest(TicTacToeViewTest):
         response = self.client.post(
             reverse("tictactoe:set_field_state", args=(self.board_id, 0, 0))
         )
-        self.assertEqual(response.status_code, 403)  # Status code is FORBIDDEN
+        self.assertEqual(response.status_code, StatusCode.FORBIDDEN.value)
 
     def test_logged_user_can_modify_their_board(self):
         board = Board.objects.get(pk=self.board_id)
@@ -118,7 +146,7 @@ class SetFieldStateViewTest(TicTacToeViewTest):
         def modify_board(user: User, row: int, col: int, new_field_state: FieldState):
             self.client.login(username=user.username, password=self.password)
 
-            response = self.client.post(
+            self.client.post(
                 reverse("tictactoe:set_field_state", args=(self.board_id, row, col))
             )
 
@@ -141,14 +169,14 @@ class SetFieldStateViewTest(TicTacToeViewTest):
         response = self.client.post(
             reverse("tictactoe:set_field_state", args=(self.board_id, 0, 0))
         )
-        self.assertEqual(response.status_code, 403)  # Status code is FORBIDDEN
+        self.assertEqual(response.status_code, StatusCode.FORBIDDEN.value)
         self.assertEqual(board, Board.objects.get(pk=self.board_id))
 
 
 class CreateBoardViewTest(TicTacToeViewTest):
     def test_non_logged_users_cannot_create_board(self) -> None:
         response = self.client.post(reverse("tictactoe:create_board"))
-        self.assertEqual(response.status_code, 403)  # Status code is FORBIDDEN
+        self.assertEqual(response.status_code, StatusCode.FORBIDDEN.value)
 
     def test_logged_user_can_create_board(self) -> None:
         initial_boards_count = Board.objects.count()

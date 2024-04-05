@@ -19,6 +19,10 @@
     <p>Noughts: {{ board.noughts_player }}</p>
 </div>
 
+{% if user_can_join %}
+<button hx-post="{% url 'tictactoe:join_board' board.id %}">Join board</button>
+{% endif %}
+
 <div id="board_area">
     <p>Board:</p>
     {% include "tictactoe/board_detail.html" %}
