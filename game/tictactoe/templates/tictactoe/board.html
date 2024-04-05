@@ -16,11 +16,15 @@
 {% endblock %}
 
 {% block content %}
-<p>Crosses: {{ board.crosses_player }}</p>
-<p>Noughts: {{ board.noughts_player }}</p>
+<div id="players_area">
+    <p>Crosses: {{ board.crosses_player }}</p>
+    <p>Noughts: {{ board.noughts_player }}</p>
+</div>
 
-<p>Board:</p>
-{% include "tictactoe/board_detail.html" %}
+<div id="board_area">
+    <p>Board:</p>
+    {% include "tictactoe/board_detail.html" %}
+</div>
 
 <div id="status_area" hidden>
     <p id="status_message"></p>

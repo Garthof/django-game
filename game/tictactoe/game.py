@@ -16,7 +16,8 @@ class Game:
     def __init__(self, board: Board) -> None:
         self.board = board
 
-    def get_state(self) -> GameState:
+    @property
+    def state(self) -> GameState:
         if self.__is_match_three(FieldState.X):
             return GameState.CROSSES_WON
         elif self.__is_match_three(FieldState.O):
@@ -34,8 +35,7 @@ class Game:
         if field_state != FieldState.EMPTY:
             raise Exception("Occupied space cannot be changed")
 
-        game_state = self.get_state()
-        if game_state != GameState.ON_GOING:
+        if self.state != GameState.ON_GOING:
             raise Exception("Game is over")
 
         crosses_count = self.board.state.count(FieldState.X.value)

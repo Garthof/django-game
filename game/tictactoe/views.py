@@ -4,7 +4,7 @@ from django.http import Http404, HttpRequest, HttpResponse, HttpResponseForbidde
 from django.shortcuts import render
 from django.urls import reverse
 
-from .game import Game
+from .game import Game, GameState
 from .models import Board, FieldState
 
 
@@ -38,19 +38,14 @@ def index(request: HttpRequest) -> HttpResponse:
     return render(request, "tictactoe/index.html", context)
 
 
-def board(request: HttpRequest, id: int) -> HttpResponse:
-    try:
-        board = Board.objects.get(pk=id)
-    except Board.DoesNotExist:
-        raise Http404(f"Board {id} does not exist")
+def board(request: HttpRequest, board_id: int) -> HttpResponse:
+    return render(request, "tictactoe/board.html", generate_board_context(board_id))
 
-    field_infos = [[FieldInfo(board, row, col) for col in range(3)] for row in range(3)]
-    context: dict[str, Any] = {"board": board, "field_infos": field_infos}
 
-    if request.headers.get("HX-Request"):
-        return render(request, "tictactoe/board_detail.html", context)
-    else:
-        return render(request, "tictactoe/board.html", context)
+def board_detail(request: HttpRequest, board_id: int) -> HttpResponse:
+    return render(
+        request, "tictactoe/board_detail.html", generate_board_context(board_id)
+    )
 
 
 def set_field_state(
@@ -78,4 +73,31 @@ def set_field_state(
     except Exception as e:
         return HttpResponseForbidden(str(e))
 
-    return HttpResponse(new_field_state.value)
+    return board_detail(request, board_id)
+
+
+def generate_board_context(board_id: int) -> dict[str, Any]:
+    try:
+        board = Board.objects.get(pk=board_id)
+    except Board.DoesNotExist:
+        raise Http404(f"Board {board_id} does not exist")
+
+    player_victory_text = (
+        lambda player, symbol: f"Game is over. Player {player} ({symbol}) won"
+    )
+    game = Game(board)
+    match game.state:
+        case GameState.CROSSES_WON | GameState.NOUGHTS_WON:
+            victory_text = player_victory_text(board.crosses_player, game.state.value)
+        case GameState.TIE:
+            victory_text = "Game has ended with a tie"
+        case _:
+            victory_text = None
+
+    field_infos = [[FieldInfo(board, row, col) for col in range(3)] for row in range(3)]
+
+    return {
+        "victory_text": victory_text,
+        "board": board,
+        "field_infos": field_infos,
+    }

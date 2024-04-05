@@ -101,7 +101,6 @@ class SetFieldStateViewTest(TicTacToeViewTest):
             response = self.client.post(
                 reverse("tictactoe:set_field_state", args=(self.board_id, row, col))
             )
-            self.assertEqual(response.content.decode(), new_field_state.value)
 
             modified_board = Board.objects.get(pk=self.board_id)
             self.assertEqual(modified_board.get_field_state(row, col), new_field_state)
@@ -134,22 +133,22 @@ class GameTest(TestCase):
 
     def test_get_state(self):
         self.board.state = "         "
-        self.assertEquals(self.game.get_state(), GameState.ON_GOING)
+        self.assertEquals(self.game.state, GameState.ON_GOING)
 
         self.board.state = "XXX      "
-        self.assertEquals(self.game.get_state(), GameState.CROSSES_WON)
+        self.assertEquals(self.game.state, GameState.CROSSES_WON)
 
         self.board.state = "  O  O  O"
-        self.assertEquals(self.game.get_state(), GameState.NOUGHTS_WON)
+        self.assertEquals(self.game.state, GameState.NOUGHTS_WON)
 
         self.board.state = "X   X   X"
-        self.assertEquals(self.game.get_state(), GameState.CROSSES_WON)
+        self.assertEquals(self.game.state, GameState.CROSSES_WON)
 
         self.board.state = "  O O O  "
-        self.assertEquals(self.game.get_state(), GameState.NOUGHTS_WON)
+        self.assertEquals(self.game.state, GameState.NOUGHTS_WON)
 
         self.board.state = "XOXXOXOXO"
-        self.assertEquals(self.game.get_state(), GameState.TIE)
+        self.assertEquals(self.game.state, GameState.TIE)
 
     def test_occupy_field_with_cross(self) -> None:
         # Occupying with an empty state raises an exception
