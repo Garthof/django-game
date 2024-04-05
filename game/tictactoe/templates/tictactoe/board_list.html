@@ -1,9 +1,13 @@
-<div id="boards">
-    {% for board in user_boards %}
-    <ul class="board_info">
+<div id="board_list">
+    {% if board_list %}
+    {% for board in board_list %}
+    <ul id="board_info">
         <li>ID: <a href="{% url 'tictactoe:board' board.id %}">{{ board.id }}</a></li>
         <li>Crosses: {{ board.crosses_player }}</li>
         <li>Noughts: {{ board.noughts_player }}</li>
     </ul>
     {% endfor %}
+    {% else %}
+    <p>No boards to display</p>
+    {% endif %}
 </div>

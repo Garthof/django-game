@@ -58,18 +58,37 @@ class TicTacToeViewTest(TestCase):
         cls.board3 = Board.objects.create(
             crosses_player=cls.user3, noughts_player=cls.user1
         )
+        cls.board4 = Board.objects.create(crosses_player=cls.user2, noughts_player=None)
+        cls.board5 = Board.objects.create(crosses_player=cls.user3, noughts_player=None)
 
 
-class IndexViewTest(TicTacToeViewTest):
+class UserBoardsTest(TicTacToeViewTest):
     def test_non_logged_users_see_no_boards(self) -> None:
-        response = self.client.get(reverse("tictactoe:index"))
-        self.assertQuerySetEqual(response.context["user_boards"], [], ordered=False)
+        response = self.client.get(reverse("tictactoe:user_boards"))
+        self.assertQuerySetEqual(response.context["board_list"], [], ordered=False)
 
     def test_boards_of_logged_user_are_displayed(self) -> None:
         self.client.login(username=self.user1.username, password=self.password)
-        response = self.client.get(reverse("tictactoe:index"))
+        response = self.client.get(reverse("tictactoe:user_boards"))
         self.assertQuerySetEqual(
-            response.context["user_boards"], [self.board1, self.board3], ordered=False
+            response.context["board_list"],
+            [self.board1, self.board3],
+            ordered=False,
+        )
+
+
+class OpenBoardsTest(TicTacToeViewTest):
+    def test_non_logged_users_see_no_boards(self) -> None:
+        response = self.client.get(reverse("tictactoe:user_boards"))
+        self.assertQuerySetEqual(response.context["board_list"], [], ordered=False)
+
+    def test_logged_users_see_open_boards_from_other_users(self) -> None:
+        self.client.login(username=self.user1.username, password=self.password)
+        response = self.client.get(reverse("tictactoe:open_boards"))
+        self.assertQuerySetEqual(
+            response.context["board_list"],
+            [self.board4, self.board5],
+            ordered=False,
         )
 
 

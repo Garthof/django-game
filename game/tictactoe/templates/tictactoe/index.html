@@ -10,11 +10,17 @@
 {% if user.is_authenticated %}
 <p>User: {{ user.get_username }}</p>
 
-{% include "tictactoe/board_list.html" %}
-
-<div>
-    <button hx-post="{% url 'tictactoe:create_board' %}">Create new board</button>
+<button hx-trigger="load, click" hx-get="{% url 'tictactoe:user_boards'  %}" hx-target="#board_area" hx-swap="innerHTML">
+    My boards
+</button>
+<button hx-get="{% url 'tictactoe:open_boards'  %}" hx-target="#board_area" hx-swap="innerHTML">
+    Open boards
+</button> 
+<div id="board_area">
+    <p>Boards could not be loaded</p>
 </div>
+
+<button hx-post="{% url 'tictactoe:create_board' %}">Create new board</button>
 
 <form id="logout-form" method="post" action="{% url 'logout' %}">
     {% csrf_token %}

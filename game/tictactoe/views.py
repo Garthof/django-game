@@ -1,5 +1,6 @@
 from typing import Any
 
+from django.db.models import Q
 from django.http import (
     Http404,
     HttpRequest,
@@ -33,15 +34,32 @@ class FieldInfo:
 
 
 def index(request: HttpRequest) -> HttpResponse:
-    user_boards = None
+    return render(request, "tictactoe/index.html")
+
+
+def user_boards(request: HttpRequest) -> HttpResponse:
+    board_list = None
 
     if request.user.is_authenticated:
-        user_boards = Board.objects.filter(
+        board_list = Board.objects.filter(
             crosses_player=request.user
         ) | Board.objects.filter(noughts_player=request.user)
 
-    context: dict[str, Any] = {"user_boards": user_boards}
-    return render(request, "tictactoe/index.html", context)
+    context: dict[str, Any] = {"board_list": board_list}
+    return render(request, "tictactoe/board_list.html", context)
+
+
+def open_boards(request: HttpRequest) -> HttpResponse:
+    board_list = None
+
+    if request.user.is_authenticated:
+        board_list = Board.objects.filter(
+            (Q(crosses_player=None) & ~Q(noughts_player=request.user))
+            | (~Q(crosses_player=request.user) & Q(noughts_player=None))
+        )
+
+    context: dict[str, Any] = {"board_list": board_list}
+    return render(request, "tictactoe/board_list.html", context)
 
 
 def board(request: HttpRequest, board_id: int) -> HttpResponse:
