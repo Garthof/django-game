@@ -10,6 +10,10 @@
 <link rel="stylesheet" href="{% static 'tictactoe/style.css' %}" />
 {% endblock %}
 
+{% block script %}
+<script src="{% static 'tictactoe/htmx.min.js' %}"></script>
+{% endblock %}
+
 {% block content %}
 {% if user.is_authenticated %}
 <p>User: {{ user.get_username }}</p>
@@ -22,6 +26,10 @@
         <li>Noughts: {{ board.noughts_player }}</li>
     </ul>
     {% endfor %}
+</div>
+
+<div hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    <button hx-post="{% url 'tictactoe:create_board' %}">Create new board</button>
 </div>
 
 <form id="logout-form" method="post" action="{% url 'logout' %}">

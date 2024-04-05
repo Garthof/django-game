@@ -1,6 +1,12 @@
 from typing import Any
 
-from django.http import Http404, HttpRequest, HttpResponse, HttpResponseForbidden
+from django.http import (
+    Http404,
+    HttpRequest,
+    HttpResponse,
+    HttpResponseForbidden,
+    HttpResponseRedirect,
+)
 from django.shortcuts import render
 from django.urls import reverse
 
@@ -74,6 +80,22 @@ def set_field_state(
         return HttpResponseForbidden(str(e))
 
     return board_detail(request, board_id)
+
+
+def create_board(request: HttpRequest) -> HttpResponse:
+    if not request.user.is_authenticated:
+        return HttpResponseForbidden("You must be logged in to perform this action")
+
+    new_board = Board.objects.create(crosses_player=request.user)
+
+    redirect_url = reverse("tictactoe:board", args=(new_board.id,))
+    if request.headers.get("HX-Request"):
+        response = HttpResponse()
+        response.headers["HX-Redirect"] = redirect_url  # type: ignore
+    else:
+        response = HttpResponseRedirect(redirect_url)
+
+    return response
 
 
 def generate_board_context(board_id: int) -> dict[str, Any]:

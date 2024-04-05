@@ -1,7 +1,8 @@
-from typing import ClassVar
+from typing import cast
 
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from django.http import HttpResponseRedirect
 from django.test import TestCase
 from django.urls import reverse
 
@@ -123,6 +124,24 @@ class SetFieldStateViewTest(TicTacToeViewTest):
         )
         self.assertEqual(response.status_code, 403)  # Status code is FORBIDDEN
         self.assertEqual(board, Board.objects.get(pk=self.board_id))
+
+
+class CreateBoardViewTest(TicTacToeViewTest):
+    def test_non_logged_users_cannot_create_board(self) -> None:
+        response = self.client.post(reverse("tictactoe:create_board"))
+        self.assertEqual(response.status_code, 403)  # Status code is FORBIDDEN
+
+    def test_logged_user_can_create_board(self) -> None:
+        initial_boards_count = Board.objects.count()
+        self.client.login(username=self.user1.username, password=self.password)
+
+        response = self.client.post(reverse("tictactoe:create_board"))
+        self.assertEqual(response.status_code, 302)  # Status code is REDIRECT
+        current_boards_count = Board.objects.count()
+        self.assertEqual(current_boards_count, initial_boards_count + 1)
+
+        response = self.client.get(cast(HttpResponseRedirect, response).url)
+        self.assertEqual(response.context["board"].crosses_player, self.user1)
 
 
 class GameTest(TestCase):

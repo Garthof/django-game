@@ -16,6 +16,8 @@
 {% endblock %}
 
 {% block content %}
+<p><a href="{% url 'tictactoe:index' %}">Back to main page</a></p>
+
 <div id="players_area">
     <p>Crosses: {{ board.crosses_player }}</p>
     <p>Noughts: {{ board.noughts_player }}</p>

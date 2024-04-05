@@ -13,4 +13,5 @@ urlpatterns: list[URLPattern] = [
         views.set_field_state,
         name="set_field_state",
     ),
+    path("boards/create/", views.create_board, name="create_board"),
 ]
