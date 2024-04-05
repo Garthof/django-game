@@ -165,12 +165,14 @@ def generate_board_detail_context(board_id: int) -> dict[str, Any]:
         raise Http404(f"Board {board_id} does not exist")
 
     player_victory_text = (
-        lambda player, symbol: f"Game is over. Player {player} ({symbol}) won"
+        lambda player, symbol: f"Game is over. Player {player} ({symbol}) won!"
     )
     game = Game(board)
     match game.state:
-        case GameState.CROSSES_WON | GameState.NOUGHTS_WON:
-            victory_text = player_victory_text(board.crosses_player, game.state.value)
+        case GameState.CROSSES_WON:
+            victory_text = player_victory_text(board.crosses_player, FieldState.X.value)
+        case GameState.NOUGHTS_WON:
+            victory_text = player_victory_text(board.noughts_player, FieldState.O.value)
         case GameState.TIE:
             victory_text = "Game has ended with a tie"
         case _:
